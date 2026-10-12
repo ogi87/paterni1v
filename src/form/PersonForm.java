@@ -4,13 +4,19 @@
  */
 package form;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import component.FormInputPanel;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.JOptionPane;
+import model.Person;
 import validator.NumberValidator;
 
 /**
- *
+ * Glavna forma za unos podataka o osobi.
+ * Koristi prilagodjene komponente sa Strategy i Composite paternom validacije.
+ * 
  * @author student2
  */
 public class PersonForm extends javax.swing.JFrame {
@@ -20,23 +26,36 @@ public class PersonForm extends javax.swing.JFrame {
      */
     public PersonForm() {
         initComponents();
+        setLocationRelativeTo(null);
+        setTitle("Unos podataka o osobi");
         
         firstName.getStaticText().setText("Ime: ");
         firstName.getErrorText().setText("");
         firstName.getInputText().setText("");
         
-        lastName.getErrorText().setText("");
         lastName.getStaticText().setText("Prezime: ");
+        lastName.getErrorText().setText("");
         lastName.getInputText().setText("");
         
-        age.getInputText().setText("");
-        age.getStaticText().setText("Age: ");
+        age.getStaticText().setText("Godine: ");
         age.getErrorText().setText("");
-        
+        age.getInputText().setText("");
         age.setMyValidator(new NumberValidator());
+        
+        gender.getStaticText().setText("Pol: ");
+        gender.clearError();
+        
+        birthDate.getStaticText().setText("Datum rođenja: ");
+        birthDate.clearError();
     }
 
-    
+    /**
+     * Vraca listu svih ulaznih komponenti na formi (polimorfni pristup).
+     */
+    private List<FormInputPanel> getInputPanels() {
+        return Arrays.asList(firstName, lastName, age, gender, birthDate);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -48,12 +67,23 @@ public class PersonForm extends javax.swing.JFrame {
 
         firstName = new component.InputTextPanel();
         lastName = new component.InputTextPanel();
-        btnSave = new javax.swing.JButton();
         age = new component.InputTextPanel();
+        gender = new component.GenderPanel();
+        birthDate = new component.InputDatePanel();
+        btnReset = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Unos podataka o osobi");
 
-        btnSave.setText("Save");
+        btnReset.setText("Poništi");
+        btnReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetActionPerformed(evt);
+            }
+        });
+
+        btnSave.setText("Sačuvaj");
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveActionPerformed(evt);
@@ -67,17 +97,15 @@ public class PersonForm extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(firstName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lastName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(age, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(gender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(birthDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(firstName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lastName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(age, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(btnReset, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -88,8 +116,14 @@ public class PersonForm extends javax.swing.JFrame {
                 .addComponent(lastName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(age, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
-                .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(gender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(birthDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnReset, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -97,21 +131,94 @@ public class PersonForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        boolean hasError = false;
+        StringBuilder errorMessages = new StringBuilder();
+
+        // 1. Ime
+        String fN = null;
         try {
-            // TODO add your handling code here:
-            /* String fN=firstName.getInputText().getText().trim();
-            String lN=lastName.getInputText().getText().trim();
-            int ageNumber=Integer.parseInt(age.getInputText().getText().trim());*/
-            
-            String fN=firstName.getValue().toString();
-            String lN=lastName.getValue().toString();
-            int ageNumber=Integer.parseInt(age.getValue().toString());
-            
-            JOptionPane.showMessageDialog(this, fN+" "+lN+" "+ageNumber, "Ime i prezime", JOptionPane.INFORMATION_MESSAGE);
+            fN = firstName.getValue().toString();
         } catch (Exception ex) {
-            Logger.getLogger(PersonForm.class.getName()).log(Level.SEVERE, null, ex);
+            hasError = true;
+            errorMessages.append("• ").append(ex.getMessage()).append("\n");
         }
+
+        // 2. Prezime
+        String lN = null;
+        try {
+            lN = lastName.getValue().toString();
+        } catch (Exception ex) {
+            hasError = true;
+            errorMessages.append("• ").append(ex.getMessage()).append("\n");
+        }
+
+        // 3. Godine
+        Integer ageNumber = null;
+        try {
+            ageNumber = Integer.parseInt(age.getValue().toString());
+        } catch (Exception ex) {
+            hasError = true;
+            errorMessages.append("• ").append(ex.getMessage()).append("\n");
+        }
+
+        // 4. Pol
+        String genderValue = null;
+        try {
+            genderValue = gender.getValue().toString();
+        } catch (Exception ex) {
+            hasError = true;
+            errorMessages.append("• ").append(ex.getMessage()).append("\n");
+        }
+
+        // 5. Datum rodjenja
+        LocalDate dateOfBirth = null;
+        try {
+            dateOfBirth = (LocalDate) birthDate.getValue();
+        } catch (Exception ex) {
+            hasError = true;
+            errorMessages.append("• ").append(ex.getMessage()).append("\n");
+        }
+
+        // Ako bilo koje polje ima gresku, prekidamo i obavestavamo korisnika
+        if (hasError) {
+            JOptionPane.showMessageDialog(this,
+                    "Molimo ispravite sledeće greške pre čuvanja:\n\n" + errorMessages.toString(),
+                    "Greška pri validaciji unosa",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Provera logicnosti unosa (da li se godine i datum rodjenja poklapaju)
+        if (dateOfBirth != null && ageNumber != null) {
+            int calculatedAge = Period.between(dateOfBirth, LocalDate.now()).getYears();
+            if (Math.abs(calculatedAge - ageNumber) > 1) {
+                int option = JOptionPane.showConfirmDialog(this,
+                        "Unete godine (" + ageNumber + ") se ne slažu sa unetim datumom rođenja ("
+                        + calculatedAge + " god.).\nŽelite li ipak da sačuvate podatke?",
+                        "Upozorenje o neslaganju",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                if (option != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+        }
+
+        // Kreiranje domenskog objekta Person
+        Person person = new Person(fN, lN, ageNumber, genderValue, dateOfBirth);
+
+        JOptionPane.showMessageDialog(this,
+                "Podaci o osobi su uspešno sačuvani!\n\n" + person.toString(),
+                "Uspešno sačuvano",
+                JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        // Koriscenje polimorfizma za resetovanje svih komponenti
+        for (FormInputPanel panel : getInputPanels()) {
+            panel.reset();
+        }
+    }//GEN-LAST:event_btnResetActionPerformed
 
     /**
      * @param args the command line arguments
@@ -119,8 +226,11 @@ public class PersonForm extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private component.InputTextPanel age;
+    private component.InputDatePanel birthDate;
+    private javax.swing.JButton btnReset;
     private javax.swing.JButton btnSave;
     private component.InputTextPanel firstName;
+    private component.GenderPanel gender;
     private component.InputTextPanel lastName;
     // End of variables declaration//GEN-END:variables
 }

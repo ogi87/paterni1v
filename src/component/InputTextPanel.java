@@ -4,15 +4,19 @@
  */
 package component;
 
+import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import validator.CompositeValidator;
 import validator.MyValidator;
 
 /**
- *
+ * Komponenta za unos teksta sa podrskom za labelu, unos i prikaz greske.
+ * Implementira FormInputPanel radi polimorfne upotrebe u formama.
+ * 
  * @author student2
  */
-public class InputTextPanel extends javax.swing.JPanel {
+public class InputTextPanel extends javax.swing.JPanel implements FormInputPanel {
 
     private MyValidator myValidator;
 
@@ -20,17 +24,26 @@ public class InputTextPanel extends javax.swing.JPanel {
         this.myValidator = myValidator;
     }
 
-    
+    public void addValidator(MyValidator validator) {
+        if (this.myValidator == null) {
+            this.myValidator = validator;
+        } else if (this.myValidator instanceof CompositeValidator) {
+            ((CompositeValidator) this.myValidator).addValidator(validator);
+        } else {
+            this.myValidator = new CompositeValidator(this.myValidator, validator);
+        }
+    }
 
     /**
      * Creates new form InputTextPanel
      */
     public InputTextPanel() {
         initComponents();
+        errorText.setText("");
+        errorText.setForeground(Color.RED);
     }
 
     public JTextField getInputText() {
-
         return inputText;
     }
 
@@ -42,24 +55,42 @@ public class InputTextPanel extends javax.swing.JPanel {
         return errorText;
     }
 
+    public void setValue(String value) {
+        inputText.setText(value == null ? "" : value);
+        clearError();
+    }
+
+    @Override
+    public void clearError() {
+        errorText.setText("");
+    }
+
+    @Override
+    public void reset() {
+        inputText.setText("");
+        clearError();
+    }
+
+    @Override
     public Object getValue() throws Exception {
-        // proveri da li je vrednost validna
+        clearError();
+        String text = inputText.getText().trim();
+
+        if (text.isEmpty()) {
+            errorText.setText("Polje je obavezno");
+            throw new Exception("Polje '" + staticText.getText().trim() + "' je obavezno");
+        }
+
         if (myValidator != null) {
             try {
-                myValidator.validate(getInputText().getText());
+                myValidator.validate(text);
             } catch (Exception e) {
-                getErrorText().setText(e.getMessage());
+                errorText.setText(e.getMessage());
                 throw e;
             }
         }
 
-        if (inputText.getText().isEmpty()) {
-            errorText.setText("Vrednost nije validna");
-            throw new Exception("Vrednost nije ispravna");
-        }
-
-        return inputText.getText().trim();
-
+        return text;
     }
 
     /**
